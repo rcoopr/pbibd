@@ -7,6 +7,8 @@ export interface FairnessMetrics {
   variance: number;
   maxFacings: number;
   minFacings: number;
+  maxFacingsCount: number;
+  minFacingsCount: number;
   theoreticalVarianceBound: number;
 }
 
