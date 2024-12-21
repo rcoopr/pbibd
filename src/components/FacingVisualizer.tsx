@@ -3,9 +3,10 @@ import { Athlete } from '../types';
 
 interface Props {
   athletes: Athlete[];
+  maxFacings: number;
 }
 
-export default function FacingVisualizer({ athletes }: Props) {
+export default function FacingVisualizer({ athletes, maxFacings }: Props) {
   const [hoveredIndex, setHoveredIndex] = useState<number>(0);
   const [hoveredAthlete, setHoveredAthlete] = useState<number | null>(null);
   const [hoveredFacings, setHoveredFacings] = useState<[number, number][]>([]);
@@ -132,6 +133,11 @@ export default function FacingVisualizer({ athletes }: Props) {
           if (otherId < athlete.id) return null; // Only draw lines once
           const j = sortedAthletes.findIndex((a) => a.id === otherId);
           const isHighlighted = hoveredAthlete === athlete.id || hoveredAthlete === otherId;
+          const color =
+            count === 0
+              ? 'text-red-700'
+              : colorMap[Math.min(maxFacings - count, colorMap.length - 1)];
+          console.log({ maxFacings, count, color });
 
           if (count === 0) return null;
 
@@ -149,9 +155,7 @@ export default function FacingVisualizer({ athletes }: Props) {
                 C ${i * spacing + spacing / 2} ${h + bezierHeight},
                   ${j * spacing + spacing / 2} ${h + bezierHeight},
                   ${j * spacing + spacing / 2} ${h}`}
-                className={`stroke-current fill-none transition-opacity duration-300 ${
-                  colorMap[Math.min(count, colorMap.length - 1)]
-                }`}
+                className={`stroke-current fill-none transition-opacity duration-300 ${color}`}
                 opacity={isHighlighted ? 1 : hoveredAthlete !== null ? 0.05 : count * 0.1}
                 strokeWidth={1}
               />
@@ -174,9 +178,7 @@ export default function FacingVisualizer({ athletes }: Props) {
                 C ${iSpace} ${h - bezierHeight},
                   ${jSpace} ${h - bezierHeight},
                   ${jSpace} ${h}`}
-                className={`stroke-current fill-none transition-opacity duration-300 ${
-                  colorMap[Math.min(count, colorMap.length - 1)]
-                }`}
+                className={`stroke-current fill-none transition-opacity duration-300 ${color}`}
                 opacity={isHighlighted ? 1 : hoveredAthlete ? 0.05 : count * 0.1}
                 strokeWidth={1}
               />
@@ -193,9 +195,7 @@ export default function FacingVisualizer({ athletes }: Props) {
                   C ${i * spacing + spacing / 2} ${height / 2},
                     ${jSpace} ${height / 2},
                     ${jSpace} ${height - radius * 3}`}
-                className={`stroke-current fill-none transition-opacity duration-300 ${
-                  colorMap[Math.min(count, colorMap.length - 1)]
-                }`}
+                className={`stroke-current fill-none transition-opacity duration-300 ${color}`}
                 opacity={isHighlighted ? 1 : hoveredAthlete !== null ? 0.05 : count * 0.1}
                 strokeWidth={1}
               />
@@ -208,10 +208,4 @@ export default function FacingVisualizer({ athletes }: Props) {
     </svg>
   );
 }
-const colorMap = [
-  'text-red-700',
-  'text-emerald-600',
-  'text-cyan-600',
-  'text-indigo-600',
-  'text-pink-600',
-];
+const colorMap = ['text-pink-600', 'text-indigo-600', 'text-cyan-600', 'text-emerald-600'];

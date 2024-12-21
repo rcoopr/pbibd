@@ -11,6 +11,7 @@ export default function TournamentAnalyzer() {
   const [rounds, setRounds] = useState(5);
   const [iterations, setIterations] = useState(1000);
   const [draws, setDraws] = useState<DrawResult[]>([]);
+  // const [allowZeroMinFacings, setAllowZeroMinFacings] = useState(true);
   const [bestDrawByVariance, setBestDrawByVariance] = useState<DrawResult | null>(null);
   const [bestDrawByMaxFacingsCount, setBestDrawByMaxFacingsCount] = useState<DrawResult | null>(
     null
@@ -31,6 +32,10 @@ export default function TournamentAnalyzer() {
 
       const [bestDrawByVariance, bestDrawByMaxFacingsCount] = newDraws.reduce(
         (best, current) => {
+          // if (!allowZeroMinFacings && current.metrics.minFacings === 0) {
+          //   // discount draws with no athletes facing
+          //   return best;
+          // }
           if (current.metrics.maxFacings < best[0].metrics.maxFacings) {
             best[0] = current;
           } else if (
@@ -70,7 +75,7 @@ export default function TournamentAnalyzer() {
             <h2 className="text-xl font-bold">Tournament Draw Analyzer</h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700">Athletes</label>
               <input
@@ -111,6 +116,16 @@ export default function TournamentAnalyzer() {
                 min="1"
               />
             </div>
+            {/* <div>
+              <label className="block text-sm font-medium text-gray-700">0 Min Facings?</label>
+              <input
+                type="checkbox"
+                checked={allowZeroMinFacings}
+                onChange={(e) => setAllowZeroMinFacings(!!e.target.checked)}
+                style={{ zoom: 1.5 }}
+                className="mt-1 cursor-pointer block rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+              />
+            </div> */}
           </div>
 
           <button
@@ -187,7 +202,7 @@ function DrawStructure({
       <div className="mt-6">
         <h3 className="text-sm font-medium text-gray-700 mb-2">Facing Visualization</h3>
         <div className="bg-gray-50 p-4 rounded-md overflow-x-auto">
-          <FacingVisualizer athletes={draw.draw[0].flat()} />
+          <FacingVisualizer athletes={draw.draw[0].flat()} maxFacings={draw.metrics.maxFacings} />
         </div>
       </div>
 
@@ -228,11 +243,26 @@ function DrawStructure({
 function Visualization({ draws }: { draws: DrawResult[] }) {
   if (draws.length === 0) return null;
 
-  const data3D: Plotly.Data[] = [
+  const data3DitVarMax: Plotly.Data[] = [
     {
       type: 'scatter3d',
       mode: 'markers',
       x: draws.map((r) => r.iteration),
+      y: draws.map((r) => r.metrics.variance),
+      z: draws.map((r) => r.metrics.maxFacings),
+      marker: {
+        size: 3,
+        color: draws.map((r) => r.metrics.variance),
+        colorscale: 'Viridis',
+      },
+    },
+  ];
+
+  const data3DvarMaxMin: Plotly.Data[] = [
+    {
+      type: 'scatter3d',
+      mode: 'markers',
+      x: draws.map((r) => r.metrics.minFacings),
       y: draws.map((r) => r.metrics.variance),
       z: draws.map((r) => r.metrics.maxFacings),
       marker: {
@@ -283,11 +313,31 @@ function Visualization({ draws }: { draws: DrawResult[] }) {
           3D Plot: Iteration vs Variance vs Max Facings
         </h3>
         <Plot
-          data={data3D}
+          data={data3DitVarMax}
           layout={{
             margin: { l: 0, r: 0, b: 0, t: 0 },
             scene: {
               xaxis: { title: 'Iteration' },
+              yaxis: { title: 'Variance' },
+              zaxis: { title: 'Max Facings' },
+            },
+            autosize: true,
+            height: 400,
+          }}
+          useResizeHandler
+          className="w-full"
+        />
+      </div>
+      <div className="bg-white p-4 rounded-lg shadow">
+        <h3 className="text-lg font-semibold mb-2">
+          3D Plot: Min Facings vs Variance vs Max Facings
+        </h3>
+        <Plot
+          data={data3DvarMaxMin}
+          layout={{
+            margin: { l: 0, r: 0, b: 0, t: 0 },
+            scene: {
+              xaxis: { title: 'Min Facings' },
               yaxis: { title: 'Variance' },
               zaxis: { title: 'Max Facings' },
             },
