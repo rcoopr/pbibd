@@ -1,7 +1,7 @@
-import TournamentAnalyzer from './components/TournamentAnalyzer';
+import { TournamentComparison } from './components/tournament-comparison';
 
 function App() {
-  return <TournamentAnalyzer />;
+  return <TournamentComparison />;
 }
 
 export default App;

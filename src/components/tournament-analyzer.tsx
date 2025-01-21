@@ -1,154 +1,34 @@
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import Plot from 'react-plotly.js';
-import { TournamentDraw } from '../lib/TournamentDraw';
 import { DrawResult } from '../types';
 import FacingVisualizer from './FacingVisualizer';
-import { Activity, ArrowDownCircle, BarChart4, Settings } from 'lucide-react';
+import { Activity, ArrowDownCircle, BarChart4 } from 'lucide-react';
 
-export default function TournamentAnalyzer() {
-  const [athleteCount, setAthleteCount] = useState(23);
-  const [heatSize, setHeatSize] = useState(6);
-  const [rounds, setRounds] = useState(5);
-  const [iterations, setIterations] = useState(1000);
-  const [draws, setDraws] = useState<DrawResult[]>([]);
-  // const [allowZeroMinFacings, setAllowZeroMinFacings] = useState(true);
-  const [bestDrawByVariance, setBestDrawByVariance] = useState<DrawResult | null>(null);
-  const [bestDrawByMaxFacingsCount, setBestDrawByMaxFacingsCount] = useState<DrawResult | null>(
-    null
-  );
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-
-  const analyzeTournaments = useCallback(() => {
-    setIsAnalyzing(true);
-    const newDraws: DrawResult[] = [];
-
-    setTimeout(() => {
-      for (let i = 0; i < iterations; i++) {
-        const tournament = new TournamentDraw(athleteCount, heatSize, rounds);
-        const draw = tournament.generateTournament();
-        const metrics = tournament.getFairnessMetrics();
-        newDraws.push({ metrics, draw, iteration: i });
-      }
-
-      const [bestDrawByVariance, bestDrawByMaxFacingsCount] = newDraws.reduce(
-        (best, current) => {
-          // if (!allowZeroMinFacings && current.metrics.minFacings === 0) {
-          //   // discount draws with no athletes facing
-          //   return best;
-          // }
-          if (current.metrics.maxFacings < best[0].metrics.maxFacings) {
-            best[0] = current;
-          } else if (
-            current.metrics.maxFacings === best[0].metrics.maxFacings &&
-            current.metrics.variance < best[0].metrics.variance
-          ) {
-            best[0] = current;
-          }
-
-          if (current.metrics.maxFacings < best[1].metrics.maxFacings) {
-            best[1] = current;
-          } else if (
-            current.metrics.maxFacings === best[1].metrics.maxFacings &&
-            current.metrics.maxFacingsCount < best[1].metrics.maxFacingsCount
-          ) {
-            best[1] = current;
-          }
-
-          return best;
-        },
-        [newDraws[0], newDraws[0]]
-      );
-
-      setDraws(newDraws);
-      setBestDrawByVariance(bestDrawByVariance);
-      setBestDrawByMaxFacingsCount(bestDrawByMaxFacingsCount);
-      setIsAnalyzing(false);
-    }, 0);
-  }, [athleteCount, heatSize, rounds, iterations]);
-
+export default function TournamentAnalyzer({
+  draws,
+  bestDrawByVariance,
+  bestDrawByMaxFacingsCount,
+}: {
+  draws: DrawResult[],
+  bestDrawByVariance: DrawResult | null,
+  bestDrawByMaxFacingsCount: DrawResult | null,
+}) {
   return (
-    <div className="min-h-screen bg-gray-100 p-4">
       <div className="max-w-7xl mx-auto">
-        <div className="bg-white rounded-lg shadow p-6 mb-4">
-          <div className="flex items-center mb-4">
-            <Settings className="w-6 h-6 mr-2" />
-            <h2 className="text-xl font-bold">Tournament Draw Analyzer</h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Athletes</label>
-              <input
-                type="number"
-                value={athleteCount}
-                onChange={(e) => setAthleteCount(Number(e.target.value))}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                min="1"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Heat Size</label>
-              <input
-                type="number"
-                value={heatSize}
-                onChange={(e) => setHeatSize(Number(e.target.value))}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                min="2"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Rounds</label>
-              <input
-                type="number"
-                value={rounds}
-                onChange={(e) => setRounds(Number(e.target.value))}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                min="1"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Iterations</label>
-              <input
-                type="number"
-                value={iterations}
-                onChange={(e) => setIterations(Number(e.target.value))}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                min="1"
-              />
-            </div>
-            {/* <div>
-              <label className="block text-sm font-medium text-gray-700">0 Min Facings?</label>
-              <input
-                type="checkbox"
-                checked={allowZeroMinFacings}
-                onChange={(e) => setAllowZeroMinFacings(!!e.target.checked)}
-                style={{ zoom: 1.5 }}
-                className="mt-1 cursor-pointer block rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-              />
-            </div> */}
-          </div>
-
-          <button
-            onClick={analyzeTournaments}
-            disabled={isAnalyzing}
-            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
-          >
-            {isAnalyzing ? 'Analyzing...' : 'Analyze Tournaments'}
-          </button>
-        </div>
-
         {bestDrawByMaxFacingsCount && (
-          <DrawStructure
+          <DrawStructure 
             draw={bestDrawByMaxFacingsCount}
-            title="Best Draw Results by Max Facings Count"
+            title="Best Draw Results by Max Matchups Count"
           />
         )}
         {bestDrawByVariance && (
-          <DrawStructure draw={bestDrawByVariance} title="Best Draw Results by Variance" />
+          <DrawStructure 
+            draw={bestDrawByVariance} 
+            title="Best Draw Results by Variance" />
         )}
 
-        {draws.length > 0 && (
-          <div className="bg-white rounded-lg shadow p-6 mb-4">
+        {draws.length > 1 && (
+          <div className="bg-white rounded-lg min-w-fit shadow p-6 mb-4">
             <div className="flex items-center mb-4">
               <BarChart4 className="w-6 h-6 mr-2" />
               <h2 className="text-xl font-bold">Visualization</h2>
@@ -157,7 +37,6 @@ export default function TournamentAnalyzer() {
           </div>
         )}
       </div>
-    </div>
   );
 }
 
@@ -172,13 +51,13 @@ function DrawStructure({
   const toggleOpen = () => setOpen((o) => !o);
 
   return (
-    <div className="bg-white rounded-lg shadow p-6 mb-4">
+    <div className="bg-white rounded-lg min-w-fit shadow p-6 mb-4">
       <div className="flex items-center">
         <Activity className="w-6 h-6 mr-2" />
         <h2 className="text-xl font-bold">{title}</h2>
       </div>
       <p className="mb-4 opacity-60 text-sm font-semibold">
-        (Max/Min Facings) show number of iterations with that count
+        (Max/Min Matchups) show number of iterations with that count
       </p>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
@@ -186,15 +65,15 @@ function DrawStructure({
           <p className="text-2xl font-semibold">{draw.metrics.variance.toFixed(4)}</p>
         </div>
         <div>
-          <h3 className="text-sm font-medium text-gray-700">Max Facings</h3>
+          <h3 className="text-sm font-medium text-gray-700">Max Matchups</h3>
           <p className="text-2xl font-semibold">
-            {draw.metrics.maxFacings} ({draw.metrics.maxFacingsCount})
+            {draw.metrics.maxFacings} ({(100 * draw.metrics.maxFacingsCount).toFixed(2)}%)
           </p>
         </div>
         <div>
-          <h3 className="text-sm font-medium text-gray-700">Min Facings</h3>
+          <h3 className="text-sm font-medium text-gray-700">Min Matchups</h3>
           <p className="text-2xl font-semibold">
-            {draw.metrics.minFacings} ({draw.metrics.minFacingsCount})
+            {draw.metrics.minFacings} ({(100 * draw.metrics.minFacingsCount).toFixed(2)}%)
           </p>
         </div>
       </div>

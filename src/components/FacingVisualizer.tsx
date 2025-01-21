@@ -10,16 +10,17 @@ export default function FacingVisualizer({ athletes, maxFacings }: Props) {
   const [hoveredIndex, setHoveredIndex] = useState<number>(0);
   const [hoveredAthlete, setHoveredAthlete] = useState<number | null>(null);
   const [hoveredFacings, setHoveredFacings] = useState<[number, number][]>([]);
+  // console.log({hoveredFacings, hoveredAthlete})
   const spacing = 40;
   const radius = 12;
   const height = 200;
   const midpoint = athletes.length / 2;
   // const width = Math.ceil(midpoint) * spacing;
   const width = athletes.length * spacing;
-
+  
   const getFacings = (athleteId: number) => {
     const athlete = athletes.find((a) => a.id === athleteId);
-    return athlete ? Array.from(athlete.facedCount.entries()) : [];
+    return athlete ? Array.from(athlete.facedCount.entries()).sort((a, b) => a[0] - b[0]) : [];
   };
   const handleHover = (athleteId: number | null, index: number) => {
     setHoveredAthlete(athleteId);
@@ -28,15 +29,15 @@ export default function FacingVisualizer({ athletes, maxFacings }: Props) {
       setHoveredFacings(getFacings(athleteId));
     }
   };
-
+  
   const sortedAthletes = athletes.sort((a, b) => a.id - b.id);
-
+  
   return (
     <svg width={width} height={height} className="max-w-full">
       {/* Top row of numbers */}
       {sortedAthletes.slice(0, Math.ceil(midpoint)).map((athlete, i) => {
         const facingCount =
-          i === hoveredIndex ? '' : hoveredFacings[i < hoveredIndex ? i : i - 1]?.[1];
+        i === hoveredIndex ? '' : hoveredFacings[i < hoveredIndex ? i : i - 1]?.[1];       
 
         return (
           <g
@@ -137,7 +138,6 @@ export default function FacingVisualizer({ athletes, maxFacings }: Props) {
             count === 0
               ? 'text-red-700'
               : colorMap[Math.min(maxFacings - count, colorMap.length - 1)];
-          console.log({ maxFacings, count, color });
 
           if (count === 0) return null;
 

@@ -7,4 +7,12 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['lucide-react'],
   },
+  server: {
+    proxy: {
+      '/api/graphql': {  // Match the exact path you're calling
+        target: 'https://staging.liveheats.com',
+        changeOrigin: true,
+      }
+    }
+  }
 });
