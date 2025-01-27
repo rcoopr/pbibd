@@ -1,53 +1,47 @@
-import { useState, useCallback, useEffect } from 'react';
-import { Settings } from 'lucide-react';
-import TournamentAnalyzer from './tournament-analyzer';
-import { defaultData, getEventDivisionQuery } from './query';
-import { analyzeLiveheatsDraw } from '../lib/TournamentDraw';
+import { Settings } from 'lucide-react'
+import { useCallback, useState } from 'react'
+import { analyzeLiveheatsDraw } from '../lib/analyze'
+import { defaultData, getEventDivisionQuery } from './query'
+import TournamentAnalyzer from './tournament-analyzer'
 
 export default function TournamentLive() {
-  const [eventDivision, setEventDivision] = useState('87871');
-  const [data, setData] = useState(defaultData);
-  const [analysis, setAnalysis] = useState(() => analyzeLiveheatsDraw(defaultData));
-  const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    console.log(data)
-    console.log("analyzeLiveheatsDraw", analyzeLiveheatsDraw(data))
-  }, [data]);
+  const [eventDivision, setEventDivision] = useState('87871')
+  // const [data, setData] = useState(defaultData)
+  const [analysis, setAnalysis] = useState(() => analyzeLiveheatsDraw(defaultData))
+  const [isLoading, setIsLoading] = useState(false)
 
   const analyzeTournament = useCallback(async () => {
-    setIsLoading(true);
+    setIsLoading(true)
 
     const variables = {
       id: eventDivision,
-    };
+    }
 
     const response = await fetch('/api/graphql', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: 'Bearer YOUR_AUTH_TOKEN',
+        'Authorization': 'Bearer YOUR_AUTH_TOKEN',
       },
       body: JSON.stringify({
         query: getEventDivisionQuery,
         variables,
         operationName: 'getEventDivision',
       }),
-    });
+    })
 
-    console.log(response);
     if (response.ok) {
-      const data = await response.json();
+      const data = await response.json()
       if (data) {
-        setData(data.data.eventDivision.heats)
+        // setData(data.data.eventDivision.heats)
         setAnalysis(analyzeLiveheatsDraw(data.data.eventDivision.heats))
       }
 
-      console.log({ heats: data.data.eventDivision.heats });
+      // console.log({ heats: data.data.eventDivision.heats })
     }
 
-    setIsLoading(false);
-  }, [eventDivision]);
+    setIsLoading(false)
+  }, [eventDivision])
 
   return (
     <>
@@ -63,7 +57,7 @@ export default function TournamentLive() {
             <input
               type="number"
               value={eventDivision}
-              onChange={(e) => setEventDivision(e.target.value)}
+              onChange={e => setEventDivision(e.target.value)}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
               min="1"
             />
@@ -84,5 +78,5 @@ export default function TournamentLive() {
         draws={[analysis]}
       />
     </>
-  );
+  )
 }
