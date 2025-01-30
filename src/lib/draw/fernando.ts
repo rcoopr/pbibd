@@ -1,7 +1,7 @@
 import type { DrawGenerator } from './types'
 import { shuffle } from '../utils'
 
-export const draw: DrawGenerator = (athleteCount, heatSize, roundCount) => {
+export const fernando: DrawGenerator = (athleteCount, heatSize, roundCount) => {
   const heatCount = Math.ceil(athleteCount / heatSize)
 
   const divisionsWithSortOrder = Array.from({ length: roundCount }).map((_, i) => ({
@@ -21,7 +21,7 @@ export const draw: DrawGenerator = (athleteCount, heatSize, roundCount) => {
     return acc
   }, [] as number[][]))
 
-  return division
+  return division.map(r => r.map(h => h.filter(a => a === 0 || !!a)))
 }
 
 export function getChildAndPosition(seed: number, config: {

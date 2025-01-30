@@ -1,6 +1,6 @@
 import type { Division } from './types'
 import { describe, expect, it } from 'vitest'
-import { draw } from './fernando'
+import { fernando } from './fernando'
 
 function pp(draw: Division) {
   return `${draw.map((round, i) => `Round ${i + 1}:
@@ -9,7 +9,7 @@ function pp(draw: Division) {
 
 describe('lievheats draw hard-coded', () => {
   it('matches existing spec', () => {
-    expect(pp(draw(9, 3, 3))).toEqual(pp([
+    expect(pp(fernando(9, 3, 3))).toEqual(pp([
       [
         [1, 2, 3],
         [4, 5, 6],
@@ -27,7 +27,7 @@ describe('lievheats draw hard-coded', () => {
       ],
     ]))
 
-    expect(pp(draw(3, 3, 3))).toEqual(pp([
+    expect(pp(fernando(3, 3, 3))).toEqual(pp([
       [
         [1, 2, 3],
       ],
@@ -39,7 +39,7 @@ describe('lievheats draw hard-coded', () => {
       ],
     ]))
 
-    expect(pp(draw(2, 2, 5))).toEqual(pp([
+    expect(pp(fernando(2, 2, 5))).toEqual(pp([
       [
         [1, 2],
       ],

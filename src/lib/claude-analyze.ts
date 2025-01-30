@@ -1,5 +1,9 @@
 import { findMaxBy } from './utils'
 
+function distributeSum(length: number, sum: number) {
+  return Array.from({ length }).map((_, i) => Math.floor(sum / length) + (i < sum % length ? 1 : 0))
+}
+
 type Heat = number[]
 type Round = Heat[]
 type Tournament = Round[]
@@ -21,11 +25,18 @@ interface MatchupStats {
   averageMatchups: number
   neverMeetPairs: Array<[number, number]>
   frequentMeetPairs: Array<Matchup>
+  theoreticalAvg: number
+  matchupCountTable: number[]
 }
 
-interface TournamentAnalysis {
+export interface TournamentAnalysis {
   matchups: MatchupStats
   heats: HeatSizeStats
+  counts: {
+    mean: number
+    variance: number
+    varianceMin: number
+  }
 }
 
 export function claudeAnalyzeTournament(tournament: Tournament): TournamentAnalysis {
@@ -70,7 +81,8 @@ export function claudeAnalyzeTournament(tournament: Tournament): TournamentAnaly
   })
 
   // Check all possible pairs
-  const athletesList = Array.from(allAthletes)
+  const athletesList = Array.from(allAthletes).sort((a, b) => a - b)
+
   for (let i = 0; i < athletesList.length; i++) {
     for (let j = i + 1; j < athletesList.length; j++) {
       const key = getPairKey(athletesList[i], athletesList[j])
@@ -83,7 +95,7 @@ export function claudeAnalyzeTournament(tournament: Tournament): TournamentAnaly
   // Find frequently matchup pairs
   const frequentMeetPairs: Array<Matchup> = []
   matchups.forEach((count, key) => {
-    if (count > averageMatchups * 1.5) { // 50% more than average as threshold
+    if (count > averageMatchups * 1.2) { // 20% more than average as threshold
       const [a1, a2] = key.split('-').map(Number)
       frequentMeetPairs.push({
         pair: [a1, a2],
@@ -96,6 +108,20 @@ export function claudeAnalyzeTournament(tournament: Tournament): TournamentAnaly
   const modalHeatSize = findMaxBy(heatSizes, ([_size, count]) => count)
   const heatSizeDistribution = heatSizes.flatMap(([size, count]) => Array.from({ length: count }).fill(size) as number[])
 
+  const theoreticalAvgMatchups = 1
+
+  const matchupCountTable: number[] = []
+  for (let i = 0; i < athletesList.length - 1; i++) {
+    for (let j = i + 1; j < athletesList.length; j++) {
+      const key = getPairKey(athletesList[i], athletesList[j])
+      matchupCountTable.push(matchups.get(key) || 0)
+    }
+  }
+  const totalMatchups = matchupCountTable.reduce((a, b) => a + b, 0)
+  const evenDistribution = distributeSum(matchupCountTable.length, totalMatchups)
+
+  const mean = totalMatchups / matchupCountTable.length
+
   return {
     matchups: {
       map: matchups,
@@ -104,10 +130,17 @@ export function claudeAnalyzeTournament(tournament: Tournament): TournamentAnaly
       averageMatchups,
       neverMeetPairs,
       frequentMeetPairs,
+      theoreticalAvg: theoreticalAvgMatchups,
+      matchupCountTable,
     },
     heats: {
       mode: modalHeatSize[0],
       distribution: heatSizeDistribution,
+    },
+    counts: {
+      mean: totalMatchups / matchupCountTable.length,
+      variance: matchupCountTable.reduce((a, b) => a + b ** 2, 0) / matchupCountTable.length / mean,
+      varianceMin: evenDistribution.reduce((a, b) => a + b ** 2, 0) / evenDistribution.length / mean,
     },
   }
 }

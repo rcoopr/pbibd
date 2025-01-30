@@ -1,7 +1,7 @@
-import { TournamentComparison } from './components/tournament-comparison';
+import { Home } from '@/components/home';
 
 function App() {
-  return <TournamentComparison />;
+  return <Home />;
 }
 
 export default App;
