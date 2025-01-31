@@ -40,7 +40,7 @@ async function genAndSaveAlgoResults([name, impl]: AlgoEntry, config: AnalysisCo
   // Generate all draws
   for (let a = 2; a < config.maxAthletes; a++) {
     for (let h = 2; h < config.maxHeatSize; h++) {
-      for (let r = 1; r < config.maxRounds; r++) {
+      for (let r = 2; r <= config.maxRounds; r++) {
         // if (a * (a - 1) / 2 < r)
         //   continue
 
@@ -52,7 +52,6 @@ async function genAndSaveAlgoResults([name, impl]: AlgoEntry, config: AnalysisCo
   }
 
   const suboptimalRows = draws.filter(draw => draw.analysis.matchups.varianceChange !== 1 && draw.analysis.matchups.mean < 2)
-  console.log(suboptimalRows.map(r => r.analysis.matchups.varianceChange))
   const initialSummary = { count: 0, optimal: 0, matchups: { mean: 0, variance: 0, varianceMin: 0, varianceChange: 0, min: 0, max: 0 } }
   // Create summary statistics averaged across all draws (TODO: check outliers)
 

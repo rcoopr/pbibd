@@ -1,43 +1,45 @@
-import { useState } from 'react';
-import { Athlete } from '../types';
+import type { Athlete } from '../types'
+import { useState } from 'react'
 
 interface Props {
-  athletes: Athlete[];
-  maxFacings: number;
+  athletes: Athlete[]
+  maxFacings: number
 }
 
+const colorMap = ['text-pink-600', 'text-indigo-600', 'text-cyan-600', 'text-emerald-600']
+
 export default function FacingVisualizer({ athletes, maxFacings }: Props) {
-  const [hoveredIndex, setHoveredIndex] = useState<number>(0);
-  const [hoveredAthlete, setHoveredAthlete] = useState<number | null>(null);
-  const [hoveredFacings, setHoveredFacings] = useState<[number, number][]>([]);
+  const [hoveredIndex, setHoveredIndex] = useState<number>(0)
+  const [hoveredAthlete, setHoveredAthlete] = useState<number | null>(null)
+  const [hoveredFacings, setHoveredFacings] = useState<[number, number][]>([])
   // console.log({hoveredFacings, hoveredAthlete})
-  const spacing = 40;
-  const radius = 12;
-  const height = 200;
-  const midpoint = athletes.length / 2;
+  const spacing = 40
+  const radius = 12
+  const height = 200
+  const midpoint = athletes.length / 2
   // const width = Math.ceil(midpoint) * spacing;
-  const width = athletes.length * spacing;
-  
+  const width = athletes.length * spacing
+
   const getFacings = (athleteId: number) => {
-    const athlete = athletes.find((a) => a.id === athleteId);
-    return athlete ? Array.from(athlete.facedCount.entries()).sort((a, b) => a[0] - b[0]) : [];
-  };
+    const athlete = athletes.find(a => a.id === athleteId)
+    return athlete ? Array.from(athlete.facedCount.entries()).sort((a, b) => a[0] - b[0]) : []
+  }
   const handleHover = (athleteId: number | null, index: number) => {
-    setHoveredAthlete(athleteId);
+    setHoveredAthlete(athleteId)
     if (athleteId !== null) {
-      setHoveredIndex(index);
-      setHoveredFacings(getFacings(athleteId));
+      setHoveredIndex(index)
+      setHoveredFacings(getFacings(athleteId))
     }
-  };
-  
-  const sortedAthletes = athletes.sort((a, b) => a.id - b.id);
-  
+  }
+
+  const sortedAthletes = athletes.sort((a, b) => a.id - b.id)
+
   return (
     <svg width={width} height={height} className="max-w-full">
       {/* Top row of numbers */}
       {sortedAthletes.slice(0, Math.ceil(midpoint)).map((athlete, i) => {
-        const facingCount =
-        i === hoveredIndex ? '' : hoveredFacings[i < hoveredIndex ? i : i - 1]?.[1];       
+        const facingCount
+        = i === hoveredIndex ? '' : hoveredFacings[i < hoveredIndex ? i : i - 1]?.[1]
 
         return (
           <g
@@ -74,18 +76,18 @@ export default function FacingVisualizer({ athletes, maxFacings }: Props) {
               {facingCount || ''}
             </text>
           </g>
-        );
+        )
       })}
 
       {/* Bottom row of numbers */}
       {sortedAthletes.slice(Math.ceil(midpoint)).map((athlete, i) => {
         // adjust half a space where midpoint is e.g. 13.5
-        const adj = Math.ceil(midpoint) - midpoint;
-        const adjustedI = i + Math.ceil(midpoint);
-        const facingCount =
-          adjustedI === hoveredIndex
+        const adj = Math.ceil(midpoint) - midpoint
+        const adjustedI = i + Math.ceil(midpoint)
+        const facingCount
+          = adjustedI === hoveredIndex
             ? ''
-            : hoveredFacings[adjustedI < hoveredIndex ? adjustedI : adjustedI - 1]?.[1];
+            : hoveredFacings[adjustedI < hoveredIndex ? adjustedI : adjustedI - 1]?.[1]
 
         return (
           <g
@@ -122,30 +124,32 @@ export default function FacingVisualizer({ athletes, maxFacings }: Props) {
               {facingCount || ''}
             </text>
           </g>
-        );
+        )
       })}
 
       {/* Connection lines */}
       {sortedAthletes.map((athlete, i) => {
-        const facings = getFacings(athlete.id);
+        const facings = getFacings(athlete.id)
         // const totalFacings = facings.reduce((sum, facing) => sum + facing[1], 0);
 
         return facings.map(([otherId, count]) => {
-          if (otherId < athlete.id) return null; // Only draw lines once
-          const j = sortedAthletes.findIndex((a) => a.id === otherId);
-          const isHighlighted = hoveredAthlete === athlete.id || hoveredAthlete === otherId;
-          const color =
-            count === 0
+          if (otherId < athlete.id)
+            return null // Only draw lines once
+          const j = sortedAthletes.findIndex(a => a.id === otherId)
+          const isHighlighted = hoveredAthlete === athlete.id || hoveredAthlete === otherId
+          const color
+            = count === 0
               ? 'text-red-700'
-              : colorMap[Math.min(maxFacings - count, colorMap.length - 1)];
+              : colorMap[Math.min(maxFacings - count, colorMap.length - 1)]
 
-          if (count === 0) return null;
+          if (count === 0)
+            return null
 
           if (i < midpoint && j < midpoint) {
             // little loop to same-side number line (top half)
-            const heightModifier = 1 / Math.abs(i - j);
-            const bezierHeight = (Math.max(1 - heightModifier ** 0.35, 0.14) * height) / 2;
-            const h = radius * 3;
+            const heightModifier = 1 / Math.abs(i - j)
+            const bezierHeight = (Math.max(1 - heightModifier ** 0.35, 0.14) * height) / 2
+            const h = radius * 3
 
             return (
               <path
@@ -159,16 +163,16 @@ export default function FacingVisualizer({ athletes, maxFacings }: Props) {
                 opacity={isHighlighted ? 1 : hoveredAthlete !== null ? 0.05 : count * 0.1}
                 strokeWidth={1}
               />
-            );
+            )
           }
 
           if (i >= midpoint && j >= midpoint) {
             // little loop to same-side number line (bottom half)
-            const heightModifier = 1 / Math.abs(i - j);
-            const bezierHeight = (Math.max(1 - heightModifier ** 0.35, 0.14) * height) / 2;
-            const h = height - radius * 3;
-            const iSpace = (i - midpoint) * spacing + spacing / 2;
-            const jSpace = (j - midpoint) * spacing + spacing / 2;
+            const heightModifier = 1 / Math.abs(i - j)
+            const bezierHeight = (Math.max(1 - heightModifier ** 0.35, 0.14) * height) / 2
+            const h = height - radius * 3
+            const iSpace = (i - midpoint) * spacing + spacing / 2
+            const jSpace = (j - midpoint) * spacing + spacing / 2
 
             return (
               <path
@@ -182,11 +186,11 @@ export default function FacingVisualizer({ athletes, maxFacings }: Props) {
                 opacity={isHighlighted ? 1 : hoveredAthlete ? 0.05 : count * 0.1}
                 strokeWidth={1}
               />
-            );
+            )
           }
 
           if (i < midpoint && j >= midpoint) {
-            const jSpace = (j - midpoint) * spacing + spacing / 2;
+            const jSpace = (j - midpoint) * spacing + spacing / 2
             return (
               <path
                 strokeDasharray={count === 0 ? '5 5' : ''}
@@ -199,13 +203,12 @@ export default function FacingVisualizer({ athletes, maxFacings }: Props) {
                 opacity={isHighlighted ? 1 : hoveredAthlete !== null ? 0.05 : count * 0.1}
                 strokeWidth={1}
               />
-            );
+            )
           }
 
-          return null;
-        });
+          return null
+        })
       })}
     </svg>
-  );
+  )
 }
-const colorMap = ['text-pink-600', 'text-indigo-600', 'text-cyan-600', 'text-emerald-600'];

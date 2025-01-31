@@ -36,16 +36,19 @@ export function MatchupMatrix({ data }: { data: number[] }) {
           if (!used)
             return null
 
+          const count = data[index++]
+
           return (
             <div
               key={`${i}-${j}`}
-              className="flex items-center justify-center border-b border-r border-l -mr-px border-zinc-200"
+              className="flex items-center justify-center border-b border-r border-l -mr-px border-zinc-200 bg-blue-400"
               style={{
+                '--tw-bg-opacity': count * 0.125,
                 gridColumn: j + 1,
                 gridRow: i + 2,
               }}
             >
-              {data[index++]}
+              {count}
             </div>
           )
         }))}

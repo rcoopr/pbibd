@@ -156,6 +156,11 @@ export function createTournamentDraw(n: number, k: number, rounds: number) {
       heats.push(currentHeat)
     }
 
+    const missingAthlete = athletes.find(ath => !heats.flat().find(h => h.id === ath.id))
+    if (missingAthlete) {
+      console.warn(`Athlete ${missingAthlete.id} not in round`)
+    }
+
     return heats
   }
 
