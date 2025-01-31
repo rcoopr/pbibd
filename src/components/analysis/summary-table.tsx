@@ -91,7 +91,7 @@ export function SummaryTable({ onRowSelect, selectedRow }: SummaryTableProps) {
                 key={rowIndex}
                 onClick={() => onRowSelect(row.algorithm)}
                 className={cn('cursor-pointer transition-colors duration-150 ease-in-out', selectedRow === row.algorithm
-                  ? 'bg-blue-50 hover:bg-blue-100/70'
+                  ? 'bg-blue-50 hover:bg-blue-100/70 !border-blue-400 !border-b'
                   : rowIndex % 2 === 0 ? 'bg-white hover:bg-gray-50' : 'bg-gray-50 hover:bg-gray-100')}
               >
                 {cols.map(column => (
