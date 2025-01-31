@@ -52,7 +52,7 @@ function ParameterPlot({ title, draws, highlight, inverse }: { title: string, dr
   ]
 
   return (
-    <div className={cn(highlight ? 'bg-blue-50' : 'bg-white', 'p-4 rounded-lg shadow')}>
+    <div className={cn(highlight ? 'bg-blue-50 border-blue-400 border' : 'bg-white', 'p-4 rounded-lg shadow')}>
       <h3 className="text-lg font-semibold mb-2">
         {title}
       </h3>
