@@ -1,6 +1,6 @@
 import type { SavedDraw } from '@/lib/stats/generate'
-import { ParameterPlots } from '@/components/analysis/parameter-plot'
 import { AnalysisTable } from '@/components/analysis/draw-table'
+import { ParameterPlots } from '@/components/analysis/parameter-plot'
 import { useEffect, useState } from 'react'
 
 export interface UIAnalysisData { algorithm: string, path: string, draws: SavedDraw[] }
@@ -24,16 +24,23 @@ export function SavedAnalysis({ algorithm }: { algorithm: string | null }) {
   const selectedDraw = algorithm ? data.find(d => d.algorithm.includes(algorithm)) : null
 
   return (
-    <div className="flex flex-col gap-6 p-6">
-      {selectedDraw && (
-        <div className="bg-white rounded-lg shadow-lg p-6">
-          <div className="flex flex-col">
-            <h2>{selectedDraw.algorithm}</h2>
+    <>
+      <section className="breakout-full">
+        {selectedDraw && (
+          <>
+            <h2 className="font-semibold italic text-gray-600">
+              {'Analysis and Draw Table for algorithm: '}
+              <span className="underline">{selectedDraw.algorithm}</span>
+            </h2>
+            {/* <div className="bg-white rounded-lg shadow-lg overflow-x-auto"> */}
             <AnalysisTable data={selectedDraw.draws} />
-          </div>
-        </div>
-      )}
-      <ParameterPlots data={data} highlight={selectedDraw?.algorithm} />
-    </div>
+            {/* </div> */}
+          </>
+        )}
+      </section>
+      <section className="breakout-full">
+        <ParameterPlots data={data} highlight={selectedDraw?.algorithm} />
+      </section>
+    </>
   )
 }

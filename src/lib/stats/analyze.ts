@@ -1,6 +1,5 @@
 import type { Division } from '../draw/types'
 import { findMaxBy } from '../utils'
-import { distributeSum } from './utils'
 
 interface Matchup {
   pair: [number, number]
@@ -33,6 +32,9 @@ export interface DrawAnalysis {
     min: number
     max: number
     matrix: number[]
+    count: number
+    minMXCount: number
+    bestMinMXCount: number
   }
   heats: HeatSizeStats
 }
@@ -115,37 +117,44 @@ export function analyzeDivision(division: Division): DrawAnalysis {
       matchupCountTable.push(matchups.get(key) || 0)
     }
   }
-  const totalMatchups = matchupCountTable.reduce((a, b) => a + b, 0)
-  const evenDistribution = distributeSum(matchupCountTable.length, totalMatchups)
+  const matchupCount = matchupCountTable.reduce((a, b) => a + b, 0)
+  const uniqueMatchupCount = matchupCountTable.length
+  const evenDistribution = distributeSum(uniqueMatchupCount, matchupCount)
 
-  const mean = totalMatchups / matchupCountTable.length
-  const variance = matchupCountTable.reduce((a, b) => a + b ** 2, 0) / matchupCountTable.length / mean
+  const mean = matchupCount / uniqueMatchupCount
+  const variance = matchupCountTable.reduce((a, b) => a + b ** 2, 0) / uniqueMatchupCount / mean
   const varianceMin = evenDistribution.reduce((a, b) => a + b ** 2, 0) / evenDistribution.length / mean
 
+  const optimalMinMatchups = matchupCount > uniqueMatchupCount ? 0 : uniqueMatchupCount - matchupCount
+  const realMinMatchups = matchupCountTable.reduce((acc, m) => m === 0 ? acc + 1 : acc, 0)
+
+  // const matchupsCovered = matchupCountTable.reduce((acc, m) => m === 0 ? acc : acc + 1, 0)
+  // const bestMatchupsCovered = Math.min(matchupCount, uniqueMatchupCount)
+  // const missingMatchups = uniqueMatchupCount - matchupsCovered
+
   return {
-    // _matchups: {
-    //   map: matchups,
-    //   maxMatchups,
-    //   minMatchups,
-    //   averageMatchups,
-    //   neverMeetPairs,
-    //   frequentMeetPairs,
-    //   theoreticalAvg: theoreticalAvgMatchups,
-    //   // matchupCountTable,
-    // },
     matchups: {
       mean,
       variance,
       varianceMin,
       varianceChange: (variance / varianceMin),
-      // min: Math.min(...matchupCountTable),
-      min: matchupCountTable.reduce((acc, m) => m === 0 ? acc + 1 : acc, 0) / matchupCountTable.length,
+      min: Math.min(...matchupCountTable),
+      // min: matchupCountTable.reduce((acc, m) => m === 0 ? acc + 1 : acc, 0) / uniqueMatchupCount,
       max: Math.max(...matchupCountTable),
       matrix: matchupCountTable,
+
+      count: matchupCount,
+      minMXCount: realMinMatchups,
+      bestMinMXCount: optimalMinMatchups,
+      // missingMXPct:  Math.min()
     },
     heats: {
       mode: modalHeatSize[0],
       distribution: heatSizeDistribution,
     },
   }
+}
+
+function distributeSum(length: number, sum: number) {
+  return Array.from({ length }).map((_, i) => Math.floor(sum / length) + (i < sum % length ? 1 : 0))
 }

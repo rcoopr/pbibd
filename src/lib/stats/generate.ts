@@ -6,7 +6,7 @@ import { analyzeDivision } from './analyze'
 import { saveArtefact } from './save'
 
 export interface SavedDraw { draw: Division, analysis: { matchups: DrawAnalysis['matchups'] }, parameters: Parameters<DrawGenerator> }
-export type SavedSummary = SavedDraw['analysis'] & { count: number, optimal: number }
+export interface SavedSummary { matchups: Omit<DrawAnalysis['matchups'], 'matrix' | 'minMXCount' | 'bestMinMXCount'> & { missingMX: number, missingMXPct: number }, count: number, optimal: number }
 
 interface AnalysisConfig {
   maxAthletes: number
@@ -52,17 +52,33 @@ async function genAndSaveAlgoResults([name, impl]: AlgoEntry, config: AnalysisCo
   }
 
   const suboptimalRows = draws.filter(draw => draw.analysis.matchups.varianceChange !== 1 && draw.analysis.matchups.mean < 2)
-  const initialSummary = { count: 0, optimal: 0, matchups: { mean: 0, variance: 0, varianceMin: 0, varianceChange: 0, min: 0, max: 0 } }
+  const initialSummary: SavedSummary = { count: 0, optimal: 0, matchups: {
+    count: 0,
+    mean: 0,
+    variance: 0,
+    varianceMin: 0,
+    varianceChange: 0,
+    min: 0,
+    max: 0,
+    missingMX: 0,
+    missingMXPct: 0,
+  } }
   // Create summary statistics averaged across all draws (TODO: check outliers)
 
   const summary = suboptimalRows.reduce((summary, draw) => {
     // console.log(draw.analysis.matchups.varianceChange)
+    summary.matchups.count += draw.analysis.matchups.count
     summary.matchups.mean += draw.analysis.matchups.mean
     summary.matchups.variance += draw.analysis.matchups.variance
     summary.matchups.varianceMin += draw.analysis.matchups.varianceMin
     summary.matchups.varianceChange += draw.analysis.matchups.varianceChange
     summary.matchups.min += draw.analysis.matchups.min
     summary.matchups.max += draw.analysis.matchups.max
+    summary.matchups.missingMX += draw.analysis.matchups.minMXCount - draw.analysis.matchups.bestMinMXCount
+
+    // diff between 'best' and real, out of max possible matchups
+    summary.matchups.missingMXPct += (draw.analysis.matchups.minMXCount - draw.analysis.matchups.bestMinMXCount) / Math.min(draw.analysis.matchups.matrix.length, draw.analysis.matchups.count)
+
     return summary
   }, initialSummary)
 
@@ -73,6 +89,7 @@ async function genAndSaveAlgoResults([name, impl]: AlgoEntry, config: AnalysisCo
   summary.matchups.varianceChange /= suboptimalRows.length
   summary.matchups.min /= suboptimalRows.length
   summary.matchups.max /= suboptimalRows.length
+  summary.matchups.missingMX /= suboptimalRows.length
   summary.optimal = draws.length - suboptimalRows.length
 
   await saveArtefact(summary, 'summary', `${config.maxAthletes}-${config.maxHeatSize}-${config.maxRounds}`, name)

@@ -1,6 +1,7 @@
 import type { UIAnalysisData } from '@/components/analysis/saved-analysis'
 import type { SavedDraw } from '@/lib/stats/generate'
 import { cn } from '@/lib/utils'
+import { SwitchCamera } from 'lucide-react'
 import { useState } from 'react'
 import Plot from 'react-plotly.js'
 
@@ -12,17 +13,20 @@ export function ParameterPlots({ data, highlight }: { data: UIAnalysisData[], hi
 
   return (
     <div className="flex flex-col gap-2 bg-white rounded-lg shadow-lg p-6 w-full">
-      <div className="flex gap-4 items-center">
-        <button className="px-4 py-2 border rounded border-gray-200" onClick={() => setInverse(i => !i)}>Switch</button>
-
-        <h2 className="font-bold text-lg">
-          Parameter Plots: Showing
+      <div className="flex gap-4 items-center mb-6">
+        <button className="px-4 py-2 border rounded border-gray-200 flex items-center gap-2 transition-colors duration-150 hover:bg-gray-50 cursor-pointer" onClick={() => setInverse(i => !i)}>
+          <SwitchCamera className="h-4 w-4" />
+          {inverse ? 'Show suboptimal draws' : 'Show optimal draws'}
+        </button>
+        <h2 className="font-semibold italic text-gray-600">
+          Parameter Plots: Showing only
           {' '}
-          {inverse ? 'Optimal' : 'Suboptimal'}
+          {inverse ? 'optimal' : 'suboptimal'}
           {' '}
-          Draws
+          draws
         </h2>
       </div>
+
       <div className="flex flex-wrap items-center justify-center gap-6">
         {data.map(datum => <ParameterPlot key={datum.algorithm} title={datum.algorithm} draws={datum.draws} highlight={highlight === datum.algorithm} inverse={inverse} />)}
       </div>
@@ -52,7 +56,7 @@ function ParameterPlot({ title, draws, highlight, inverse }: { title: string, dr
   ]
 
   return (
-    <div className={cn(highlight ? 'bg-blue-50 border-blue-400 border' : 'bg-white', 'p-4 rounded-lg shadow')}>
+    <div className={cn(highlight ? 'bg-blue-50 border-blue-400 border' : 'bg-white', 'p-4 rounded-lg shadow-sm')}>
       <h3 className="text-lg font-semibold mb-2">
         {title}
       </h3>

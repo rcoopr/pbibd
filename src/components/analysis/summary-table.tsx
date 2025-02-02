@@ -15,8 +15,9 @@ export interface FlatAnalysis {
   mean: number
   variance: number
   varianceMin: number
-  varianceChange: number
-  missingMatchupsPct: number
+  varianceDiff: number
+  // missingMatchupsPct: number
+  missingMX: number
   maxMatchups: number
   count: number
   optimal: number
@@ -52,14 +53,15 @@ export function SummaryTable({ onRowSelect, selectedRow }: SummaryTableProps) {
           mean: analysis.matchups.mean,
           variance: analysis.matchups.variance,
           varianceMin: analysis.matchups.varianceMin,
-          varianceChange: analysis.matchups.varianceChange,
-          missingMatchupsPct: analysis.matchups.min,
+          varianceDiff: analysis.matchups.varianceChange,
+          // missingMatchupsPct: analysis.matchups.min,
+          missingMX: analysis.matchups.missingMX,
           maxMatchups: analysis.matchups.max,
           count: analysis.count,
           optimal: analysis.optimal,
         }
       })
-      setData(flatSummaries.sort((a, b) => a.varianceChange - b.varianceChange))
+      setData(flatSummaries.sort((a, b) => a.varianceDiff - b.varianceDiff))
     }
     fetchData()
   }, [])
@@ -67,47 +69,43 @@ export function SummaryTable({ onRowSelect, selectedRow }: SummaryTableProps) {
   if (!data.length)
     return null
 
-  const cols = ['algorithm', 'athletes', 'heatSize', 'rounds', 'mean', 'variance', 'varianceMin', 'varianceChange', 'missingMatchupsPct', 'maxMatchups', 'count', 'optimal'] as const satisfies (keyof FlatAnalysis)[]
+  const cols = ['algorithm', 'athletes', 'heatSize', 'rounds', 'mean', 'variance', 'varianceMin', 'varianceDiff', 'missingMX', 'maxMatchups', 'count', 'optimal'] as const satisfies (keyof FlatAnalysis)[]
 
   return (
-    <>
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              {[...cols].map((header, index) => (
-                <th
-                  key={header || `spacer-${index}`}
-                  className="px-6 py-3 bg-gray-100 text-left text-xs font-medium text-gray-500 uppercase tracking-wider first:border-l-0 border-l border-gray-200"
-                >
-                  {header.startsWith('variance') ? <VarianceHeader text={header} /> : formatHeader(header)}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {data.map((row, rowIndex) => (
-              <tr
-                key={rowIndex}
-                onClick={() => onRowSelect(row.algorithm)}
-                className={cn('cursor-pointer transition-colors duration-150 ease-in-out', selectedRow === row.algorithm
-                  ? 'bg-blue-50 hover:bg-blue-100/70 !border-blue-400 !border-b'
-                  : rowIndex % 2 === 0 ? 'bg-white hover:bg-gray-50' : 'bg-gray-50 hover:bg-gray-100')}
+    <table className="min-w-full divide-y divide-gray-200">
+      <thead className="bg-gray-50">
+        <tr>
+          {[...cols].map(header => (
+            <th
+              key={header}
+              className="px-6 py-3 bg-gray-100 text-left text-xs font-medium text-gray-500 uppercase tracking-wider first:border-l-0 border-l border-gray-200"
+            >
+              {header === 'missingMX' ? 'Missing MX %' : header.startsWith('variance') ? <VarianceHeader text={header} /> : formatHeader(header)}
+            </th>
+          ))}
+        </tr>
+      </thead>
+      <tbody className="divide-y divide-gray-200">
+        {data.map((row, rowIndex) => (
+          <tr
+            key={rowIndex}
+            onClick={() => onRowSelect(row.algorithm)}
+            className={cn('cursor-pointer transition-colors duration-150 outline-blue-400 ease-in-out', selectedRow === row.algorithm
+              ? 'bg-blue-50 hover:bg-blue-100/70 outline'
+              : rowIndex % 2 === 0 ? 'bg-white hover:bg-gray-50' : 'bg-gray-50 hover:bg-gray-100')}
+          >
+            {cols.map(column => (
+              <td
+                key={`${rowIndex}-${column}`}
+                className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 first:border-l-0 border-l border-gray-200"
               >
-                {cols.map(column => (
-                  <td
-                    key={`${rowIndex}-${column}`}
-                    className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 first:border-l-0 border-l border-gray-200"
-                  >
-                    {typeof row[column] === 'number' ? fmt.format(row[column]) : row[column]}
-                  </td>
-                ))}
-              </tr>
+                {typeof row[column] === 'number' ? fmt.format(row[column]) : row[column]}
+              </td>
             ))}
-          </tbody>
-        </table>
-      </div>
-    </>
+          </tr>
+        ))}
+      </tbody>
+    </table>
   )
 }
 

@@ -1,15 +1,21 @@
 import type { Division, DrawGenerator } from '@/lib/draw/types'
-import { createTournamentDraw } from '@/lib/create-tournament-draw'
-
 import { fernando } from '@/lib/draw/fernando'
-import { generateDiverseGroups as claude } from './draw/28-01'
+
+import { createTournamentDraw } from '@/lib/draw/pbibd'
 import { analyzeDivision } from '@/lib/stats/analyze'
+import { generateDiverseGroups as claude } from './draw/claude'
+
+const cache = new Map<string, Division>()
 
 const pbibd: DrawGenerator = (n, k, r) => {
+  if (cache.get(`${n}-${k}-${r}`))
+    return cache.get(`${n}-${k}-${r}`)!
+
   let best: Division = []
   let bestVC = Infinity
-  for (let i = 0; i < 50; i++) {
-    console.log("Generating draw", i)
+  for (let i = 0; i < 500; i++) {
+    // eslint-disable-next-line no-console
+    console.log(`Generating draw ${i + 1} of 50`)
     const draw = createTournamentDraw(n, k, r).generateTournament().map(r => r.map(h => h.map(a => a.id)))
     const analysis = analyzeDivision(draw)
     if (analysis.matchups.varianceChange < bestVC) {
@@ -17,6 +23,8 @@ const pbibd: DrawGenerator = (n, k, r) => {
       best = draw
     }
   }
+
+  cache.set(`${n}-${k}-${r}`, best)
   return best
 }
 
@@ -37,7 +45,7 @@ export const algorithms = {
   claude,
   // claude2,
   pbibd,
-  frankenstein
+  frankenstein,
 } as const satisfies Record<string, DrawGenerator>
 export type Algos = typeof algorithms
 export type AlgoEntry = [keyof Algos, DrawGenerator]
