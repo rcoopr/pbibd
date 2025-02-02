@@ -29,7 +29,7 @@ const pbibd: DrawGenerator = (n, k, r) => {
 }
 
 // const count = {f: 0, p: 0}
-const frankenstein: DrawGenerator = (n, k, r) => {
+const pbibd_mix: DrawGenerator = (n, k, r) => {
   const f = fernando(n, k, r)
   const fA = analyzeDivision(f)
 
@@ -45,7 +45,7 @@ export const algorithms = {
   claude,
   // claude2,
   pbibd,
-  frankenstein,
+  pbibd_mix,
 } as const satisfies Record<string, DrawGenerator>
 export type Algos = typeof algorithms
 export type AlgoEntry = [keyof Algos, DrawGenerator]
