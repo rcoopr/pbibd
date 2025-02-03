@@ -4,6 +4,7 @@ import { fernando } from '@/lib/draw/fernando'
 import { createTournamentDraw } from '@/lib/draw/pbibd'
 import { analyzeDivision } from '@/lib/stats/analyze'
 import { generateDiverseGroups as claude } from './draw/claude'
+import { fernandoBalanced } from '@/lib/draw/fernando-balanced'
 
 const cache = new Map<string, Division>()
 
@@ -30,7 +31,7 @@ const pbibd: DrawGenerator = (n, k, r) => {
 
 // const count = {f: 0, p: 0}
 const pbibd_mix: DrawGenerator = (n, k, r) => {
-  const f = fernando(n, k, r)
+  const f = fernandoBalanced(n, k, r)
   const fA = analyzeDivision(f)
 
   const p = pbibd(n, k, r)
@@ -42,6 +43,7 @@ const pbibd_mix: DrawGenerator = (n, k, r) => {
 
 export const algorithms = {
   current: fernando,
+  current_balanced: fernandoBalanced,
   claude,
   // claude2,
   pbibd,
