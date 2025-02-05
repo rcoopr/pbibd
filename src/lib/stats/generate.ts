@@ -1,5 +1,5 @@
 import type { AlgoEntry, Algos } from '@/lib/algorithms'
-import type { Division, DrawGenerator } from '../draw/types'
+import type { Contest, DrawGenerator } from '../draw/types'
 import type { DrawAnalysis } from './analyze'
 import { readFile } from 'node:fs/promises'
 import { algorithms, prepGenerate } from '@/lib/algorithms'
@@ -8,7 +8,7 @@ import { glob } from 'glob'
 import { analyzeDivision } from './analyze'
 import { saveArtefact } from './save'
 
-export interface SavedDraw { draw: Division, analysis: { matchups: DrawAnalysis['matchups'], lanes: DrawAnalysis['lanes'] }, parameters: Parameters<DrawGenerator> }
+export interface SavedDraw { draw: Contest, analysis: { matchups: DrawAnalysis['matchups'], lanes: DrawAnalysis['lanes'] }, parameters: Parameters<DrawGenerator> }
 export type SavedSummary = DrawAnalysis['lanes'] & { matchups: Omit<DrawAnalysis['matchups'], 'matrix' | 'minMXCount' | 'bestMinMXCount'> & { missingMX: number, missingMXPct: number }, count: number, optimal: number }
 
 interface AnalysisConfig {

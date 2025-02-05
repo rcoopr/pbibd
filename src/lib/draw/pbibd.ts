@@ -1,4 +1,5 @@
 import type { Athlete, FairnessMetrics } from '../../types'
+import Rand from 'rand-seed'
 
 interface WeightedAthlete {
   athlete: Athlete
@@ -80,7 +81,7 @@ export function createTournamentDraw(n: number, k: number, rounds: number) {
 
     // Weighted random selection
     const totalWeight = weightedAthletes.reduce((sum, wa) => sum + wa.weight, 0)
-    let random = Math.random() * totalWeight
+    let random = new Rand('1234').next() * totalWeight
 
     for (const wa of weightedAthletes) {
       random -= wa.weight

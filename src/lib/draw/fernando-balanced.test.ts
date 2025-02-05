@@ -1,9 +1,9 @@
-import type { Division } from './types'
+import type { Contest } from './types'
 import { roundSeedOrderNew } from '@/lib/draw/fernando-balanced'
 import { describe, expect, it } from 'vitest'
 import { fernandoBalanced } from './fernando-balanced'
 
-function pp(draw: Division) {
+function pp(draw: Contest) {
   return `${draw.map((round, i) => `Round ${i + 1}:
     ${round.map(heat => `[${heat.join(', ')}]`).join(',\n\t')}`).join('\n')}`
 }

@@ -32,6 +32,9 @@ importers:
       plotly.js:
         specifier: ^2.30.0
         version: 2.35.3(mapbox-gl@1.13.3)(webpack@5.97.1)
+      rand-seed:
+        specifier: ^2.1.7
+        version: 2.1.7
       react:
         specifier: ^18.3.1
         version: 18.3.1
@@ -3101,6 +3104,9 @@ packages:
 
   raf@3.4.1:
     resolution: {integrity: sha512-Sq4CW4QhwOHE8ucn6J34MqtZCeWFP2aQSmrlroYgqAV1PjStIhJXxYuTgUIfkEk7zTLjmIjLmU5q+fbD1NnOJA==}
+
+  rand-seed@2.1.7:
+    resolution: {integrity: sha512-Yaz75D2fTWtIr69iDd+PGwtQkFkqOIMQZl+W8U3NMR6F2a1UEk2FmnQkNd6Z1eNtL96Z5nznw5PKYk1Z9m6lxw==}
 
   randombytes@2.1.0:
     resolution: {integrity: sha512-vYl3iOX+4CKUWuxGi9Ukhie6fsqXqS9FE2Zaic4tNFD2N2QQaXOMFbuKK4QmDHC0JO6B1Zp41J0LpT0oR68amQ==}
@@ -7100,6 +7106,8 @@ snapshots:
   raf@3.4.1:
     dependencies:
       performance-now: 2.1.0
+
+  rand-seed@2.1.7: {}
 
   randombytes@2.1.0:
     dependencies:

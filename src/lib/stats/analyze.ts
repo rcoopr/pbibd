@@ -1,4 +1,4 @@
-import type { Division } from '../draw/types'
+import type { Contest } from '../draw/types'
 import { findMaxBy } from '../utils'
 
 interface Matchup {
@@ -43,7 +43,7 @@ export interface DrawAnalysis {
   }
 }
 
-export function analyzeDivision(division: Division): DrawAnalysis {
+export function analyzeDivision(division: Contest): DrawAnalysis {
   const sizes = new Map<number, number>()
   const matchups = new Map<string, number>()
 

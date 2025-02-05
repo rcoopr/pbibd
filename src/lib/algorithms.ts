@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import type { Division, DrawGenerator } from '@/lib/draw/types'
+import type { Contest, DrawGenerator } from '@/lib/draw/types'
 import { readFile } from 'node:fs/promises'
 
 import { fernando } from '@/lib/draw/fernando'
@@ -10,9 +10,9 @@ import { analyzeDivision } from '@/lib/stats/analyze'
 import { glob } from 'glob'
 import { generateDiverseGroups as claude } from './draw/claude'
 
-const cache = new Map<string, Division>()
+const cache = new Map<string, Contest>()
 
-const ITER_COUNT = 10
+const ITER_COUNT = 2000
 const ASN_TOLERANCE = 0.03
 
 let lastTime = performance.now()
@@ -21,7 +21,7 @@ function iter(count: number, pbibdGen: typeof pbibdFactory, name: string): DrawG
     if (cache.get(`${name}-${n}-${k}-${r}`))
       return cache.get(`${name}-${n}-${k}-${r}`)!
 
-    let best: Division = []
+    let best: Contest = []
     let bestVC = Infinity
     let bestAsn = Infinity
 
@@ -69,7 +69,7 @@ const pbibd_mix: DrawGenerator = (n, k, r) => {
   return fA.matchups.varianceChange < pA.matchups.varianceChange ? f : p
 }
 
-let cpSatData: { draw: Division, status: string, parameters: [number, number, number] }[] = []
+let cpSatData: { draw: Contest, status: string, parameters: [number, number, number] }[] = []
 const cp_sat: DrawGenerator = (n, k, r) => {
   const cpSatResult = cpSatData.find(d => d.parameters[0] === n && d.parameters[1] === k && d.parameters[2] === r)
   console.log({ cpSatResult })
@@ -86,7 +86,7 @@ const cp_sat: DrawGenerator = (n, k, r) => {
     }
     acc[acc.length - 1].push(heat[0])
     return acc
-  }, [] as Division)
+  }, [] as Contest)
 }
 
 export async function prepGenerate() {

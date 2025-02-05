@@ -1,5 +1,5 @@
 import type { fernando } from '@/lib/draw/fernando'
-import type { Division } from '@/lib/draw/types'
+import type { Contest } from '@/lib/draw/types'
 import type { DrawAnalysis } from '@/lib/stats/analyze'
 import type { SavedDraw } from '@/lib/stats/generate'
 import { MatchupMatrix } from '@/components/analysis/matchup-matrix'
@@ -11,7 +11,7 @@ import { useState } from 'react'
 import Plot from 'react-plotly.js'
 
 const MAX_ROWS = 20
-export interface NewAnalysis { draw: Division, analysis: DrawAnalysis, parameters: Parameters<typeof fernando> }
+export interface NewAnalysis { draw: Contest, analysis: DrawAnalysis, parameters: Parameters<typeof fernando> }
 
 const fmt = new Intl.NumberFormat('en-GB', { maximumFractionDigits: 2 })
 
@@ -294,7 +294,7 @@ function Row({ analysis, parameters, draw }: SavedDraw) {
   )
 }
 
-function PPDraw({ draw }: { draw: Division }) {
+function PPDraw({ draw }: { draw: Contest }) {
   return (
     <div className="flex flex-col">
       <p className="uppercase font-semibold text-gray-500 tracking-widest">Full Division Draw</p>

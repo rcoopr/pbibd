@@ -1,4 +1,4 @@
-export type Division = Round[]
+export type Contest = Round[]
 export type Round = Heat[]
 export type Heat = number[]
 
@@ -12,7 +12,7 @@ export interface AthleteEncounter {
   round: number
 }
 
-export type DrawGenerator = (athleteCount: number, heatSize: number, roundCount: number) => Division
+export type DrawGenerator = (athleteCount: number, heatSize: number, roundCount: number) => Contest
 export type AnalyzedDrawGenerator<Opts extends Record<string, unknown> = Record<string, never>> = (
   athleteCount: number,
   heatSize: number,

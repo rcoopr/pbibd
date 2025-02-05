@@ -1,9 +1,9 @@
-import type { Division } from './types'
-import { gaussianWeightedSelection } from '@/lib/draw/pbibd-lane'
+import type { Contest } from './types'
 import { describe, expect, it } from 'vitest'
+import { gaussianWeightedSelection } from '../shuffle'
 import { fernando } from './fernando'
 
-function pp(draw: Division) {
+function pp(draw: Contest) {
   return `${draw.map((round, i) => `Round ${i + 1}:
     ${round.map(heat => `[${heat.join(', ')}]`).join(',\n\t')}`).join('\n')}`
 }
