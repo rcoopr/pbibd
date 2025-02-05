@@ -1,8 +1,10 @@
 import type { AlgoEntry, Algos } from '@/lib/algorithms'
 import type { Division, DrawGenerator } from '../draw/types'
 import type { DrawAnalysis } from './analyze'
-import { algorithms } from '@/lib/algorithms'
+import { readFile } from 'node:fs/promises'
+import { algorithms, prepGenerate } from '@/lib/algorithms'
 import { createTournamentDraw } from '@/lib/draw/pbibd-lane'
+import { glob } from 'glob'
 import { analyzeDivision } from './analyze'
 import { saveArtefact } from './save'
 
@@ -21,9 +23,22 @@ const defaultAnalysisConfig: AnalysisConfig = {
 };
 
 // Generate stats for all algos
-(async () => generateSummaryStats())()
-// (() => {
-//   createTournamentDraw(16, 3, 5).generateTournament()
+(async () => {
+  // await prepGenerate()
+  generateSummaryStats('pbibd_lane')
+})()
+
+// (async () => {
+//   console.log("glob", Object.values(await glob(`**/artefacts/cp-sat/*.json`)))
+//   const draws = await Promise.all(Object.values(await glob(`**/artefacts/cp-sat/*.json`)).map(async (path) => {
+//     const contents = await readFile(path, {encoding: 'utf-8'})
+//     // const json = await read()
+//     // console.log({json})
+//     // return json.default
+//     return JSON.parse(contents)
+//   }))
+
+//   await saveArtefact(draws.flat(), 'cp-sat', 'combined',  'all')
 // })()
 
 async function generateSummaryStats(algorithm?: keyof Algos, config: AnalysisConfig = defaultAnalysisConfig) {

@@ -265,66 +265,84 @@ export function gaussianWeightedSelection(n: number, p: number[], sigma: number 
 }
 
 export function rotateAthletes(rounds: number[][][]): number[][][] {
-  const numRounds = rounds.length
-  const numHeats = rounds[0].length
-  const numAthletesPerHeat = rounds[0][0].length
+  let best: [number, number[][][]] = [Infinity, rounds]
 
-  // For each heat, track the position history of each athlete
-  const positionHistory: Map<number, number[]>[] = Array.from({ length: numHeats })
-    .fill(null)
-    .map(() => new Map<number, number[]>())
-
-  // Initialize position history for the first round
-  for (let heatIndex = 0; heatIndex < numHeats; heatIndex++) {
-    const heat = rounds[0][heatIndex]
-    for (let position = 0; position < heat.length; position++) {
-      const athlete = heat[position]
-      if (!positionHistory[heatIndex].has(athlete)) {
-        positionHistory[heatIndex].set(athlete, [])
-      }
-      positionHistory[heatIndex].get(athlete)!.push(position)
-    }
-  }
-
-  // For each subsequent round, assign athletes to new positions
-  for (let roundIndex = 1; roundIndex < numRounds; roundIndex++) {
-    for (let heatIndex = 0; heatIndex < numHeats; heatIndex++) {
-      const heat = rounds[roundIndex][heatIndex]
-      const availablePositions = new Set<number>(
-        Array.from({ length: numAthletesPerHeat }, (_, i) => i),
-      )
-
-      // Assign positions to athletes, avoiding positions they've recently occupied
-      for (let athleteIndex = 0; athleteIndex < heat.length; athleteIndex++) {
-        const athlete = heat[athleteIndex]
-        const history = positionHistory[heatIndex].get(athlete) || []
-
-        // Find the least-used position that the athlete hasn't occupied recently
-        let chosenPosition = -1
-        for (const position of availablePositions) {
-          if (!history.includes(position)) {
-            chosenPosition = position
-            break
-          }
+  for (let r = 0; r < rounds.length; r++) {
+    for (let h = 0; h <= rounds[0].length; h++) {
+      for (let a = 0; a <= rounds[0][0].length; a++) {
+        const [metric, draw] = _rotateAthletes(rounds, r, h, a)
+        if (metric < best[0]) {
+          best = [metric, draw]
         }
-
-        // If all positions have been used, choose the one used least frequently
-        if (chosenPosition === -1) {
-          const positionCounts = new Map<number, number>()
-          for (const position of availablePositions) {
-            positionCounts.set(position, history.filter(p => p === position).length)
-          }
-          chosenPosition = Array.from(positionCounts.entries())
-            .sort((a, b) => a[1] - b[1])[0][0]
-        }
-
-        // Assign the chosen position to the athlete
-        rounds[roundIndex][heatIndex][athleteIndex] = chosenPosition
-        positionHistory[heatIndex].get(athlete)?.length ? positionHistory[heatIndex].get(athlete)!.push(chosenPosition) : positionHistory[heatIndex].set(athlete, [chosenPosition])
-        availablePositions.delete(chosenPosition)
       }
     }
   }
 
-  return rounds
+  console.log(best[0])
+  return best[1]
+}
+
+export function _rotateAthletes(_rounds: number[][][], rBy = 0, hBy = 0, aBy = 0): [number, number[][][]] {
+  const rounds = cycleArray(_rounds, rBy)
+  const athletes = Array.from(new Set(rounds.flat(Infinity))) as number[]
+
+  // each athlete has an array that stores the count of 'usages' of a lane
+  const history = new Map<number, number[]>(athletes.map(athlete => ([athlete, []])))
+
+  const shuffled = rounds.map((_round, r_i) => {
+    const round = cycleArray(_round, hBy + r_i - 1)
+    if (r_i === 0) {
+      // Initialize lane history for the first round
+      round.forEach(heat => heat.forEach((athlete, lane) => {
+        history.set(athlete, Array.from({ length: heat.length }).map(i => i === lane ? 1 : 0))
+      }))
+
+      return round
+    }
+
+    return round.map((_heat, h_i) => {
+      const heat = cycleArray(_heat, aBy + h_i)
+      const newLanes: number[] = [...heat].fill(0)
+
+      heat.forEach((athlete) => {
+        const prevLanes = history.get(athlete)!
+        while (prevLanes.length < newLanes.length)
+          prevLanes.push(0)
+
+        let min = Math.min(...prevLanes)
+        min = min === Infinity ? 0 : min
+
+        let position = -1
+        let tries = 0
+        while (position === -1 && tries < 100) {
+          tries++
+          const nextLane = prevLanes.findIndex((l, l_i) => {
+            if (tries > 99)
+              console.log({ athlete, l, l_i, prevLanes, newLanes, min, tries })
+            return l <= min && newLanes[l_i] === 0
+          })
+          if (nextLane === -1) {
+            min++
+          }
+          else {
+            position = nextLane
+          }
+        }
+
+        newLanes[position] = athlete
+        prevLanes[position] = (prevLanes[position] || 0) + 1
+      })
+      return newLanes
+    })
+  })
+
+  const metric = Array.from(history.values()).map(lanes => lanes.reduce((sum, count) => sum + count ** 2, 0)).reduce((acc, val) => acc + val, 0)
+  // console.log(metric, Array.from(history.values()))
+
+  return [metric, shuffled]
+}
+
+function cycleArray<T>(arr: T[], by: number): T[] {
+  const step = by % arr.length
+  return [...arr.slice(step), ...arr.slice(0, step)]
 }

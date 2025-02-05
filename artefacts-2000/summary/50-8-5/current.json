@@ -1,0 +1,17 @@
+{
+  "count": 463,
+  "optimal": 689,
+  "matchups": {
+    "count": 85002,
+    "mean": 0.8178608022071366,
+    "variance": 1.5642081396253773,
+    "varianceMin": 1.1330057604423747,
+    "varianceChange": 1.367878785007155,
+    "min": 0,
+    "max": 2.9892008639308854,
+    "missingMX": 26.19654427645788,
+    "missingMXPct": 76.94570125564033
+  },
+  "asnSumSqAvg": 4.502634625833603,
+  "asnSumSqBest": 4.08207343412527
+}
