@@ -4,7 +4,9 @@ import type { DrawAnalysis } from '@/lib/stats/analyze'
 import type { SavedDraw } from '@/lib/stats/generate'
 import { MatchupMatrix } from '@/components/analysis/matchup-matrix'
 import { cn } from '@/lib/utils'
-import { ChevronLeft, ChevronRight, Search } from 'lucide-react'
+import ChevronLeft from 'lucide-react/icons/chevron-left'
+import ChevronRight from 'lucide-react/icons/chevron-right'
+import Search from 'lucide-react/icons/search'
 import { useState } from 'react'
 import Plot from 'react-plotly.js'
 
@@ -42,7 +44,7 @@ export function AnalysisTable({ data }: { data: SavedDraw[] }) {
     const byRound = roundSearch ? a.parameters[2] === roundSearch : true
     const byOptimal = hideOptimal ? a.analysis.matchups.varianceChange !== 1 : true
     return byAth && byHeat && byRound && byOptimal
-  }).sort((a, b) => b.analysis.matchups.varianceChange - a.analysis.matchups.varianceChange)
+  }).sort((a, b) => (b.analysis.lanes.asnSumSqAvg / b.analysis.lanes.asnSumSqBest) - (a.analysis.lanes.asnSumSqAvg / a.analysis.lanes.asnSumSqBest))
 
   const viewedAnalysis = filteredData.slice((page - 1) * MAX_ROWS, page * MAX_ROWS)
   const maxPages = Math.ceil(filteredData.length / MAX_ROWS)
@@ -214,10 +216,11 @@ export function AnalysisTable({ data }: { data: SavedDraw[] }) {
                 <br />
                 MX
               </Th>
+              <Th>Lane Asn</Th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
-            {viewedAnalysis.length === 0 && <tr><Td colSpan={12} className="bg-white text-center italic text-gray-400">No results found</Td></tr>}
+            {viewedAnalysis.length === 0 && <tr><Td colSpan={13} className="bg-white text-center italic text-gray-400">No results found</Td></tr>}
 
             {viewedAnalysis.map((row, rowIndex) => (
               <Row {...row} key={`${rowIndex}-${page}`} />
@@ -274,11 +277,12 @@ function Row({ analysis, parameters, draw }: SavedDraw) {
             }}
           />
         </Td>
+        <Td>{fmt.format(analysis.lanes.asnSumSqAvg / analysis.lanes.asnSumSqBest)}</Td>
       </tr>
 
       {showDraw && (
         <tr>
-          <Td colSpan={12}>
+          <Td colSpan={13}>
             <div className="flex items-start justify-around gap-6 col-span-full py-4 overflow-x-aut">
               <PPDraw draw={draw} />
               <MatchupMatrix data={analysis.matchups.matrix} />

@@ -37,6 +37,10 @@ export interface DrawAnalysis {
     bestMinMXCount: number
   }
   heats: HeatSizeStats
+  lanes: {
+    asnSumSqAvg: number
+    asnSumSqBest: number
+  }
 }
 
 export function analyzeDivision(division: Division): DrawAnalysis {
@@ -74,9 +78,17 @@ export function analyzeDivision(division: Division): DrawAnalysis {
   // Find pairs that never meet
   const neverMeetPairs: Array<[number, number]> = []
   const allAthletes = new Set<number>()
+  const laneAssignments = new Map<number, number[]>()
+
   division.forEach((round) => {
     round.forEach((heat) => {
-      heat.forEach(athlete => allAthletes.add(athlete))
+      heat.forEach((athlete, heatIndex) => {
+        allAthletes.add(athlete)
+
+        const assignments = laneAssignments.get(athlete) || []
+        assignments[heatIndex] = (assignments[heatIndex] || 0) + 1
+        laneAssignments.set(athlete, assignments)
+      })
     })
   })
 
@@ -132,6 +144,14 @@ export function analyzeDivision(division: Division): DrawAnalysis {
   // const bestMatchupsCovered = Math.min(matchupCount, uniqueMatchupCount)
   // const missingMatchups = uniqueMatchupCount - matchupsCovered
 
+  const asn = Array.from(laneAssignments.values()).map(athletesLanes => athletesLanes.reduce((acc, lanes) => acc + (lanes ** 2), 0))
+  const asnSumSqAvg = asn.reduce((acc, val) => acc + val, 0) / asn.length
+
+  const rTimes = Math.floor(division.length / modalHeatSize[0])
+  const rRem = division.length % modalHeatSize[0]
+  const asnSumSqBest
+    = rRem * ((rTimes + 1) ** 2) + (modalHeatSize[0] - rRem) * rTimes ** 2
+
   return {
     matchups: {
       mean,
@@ -151,6 +171,10 @@ export function analyzeDivision(division: Division): DrawAnalysis {
     heats: {
       mode: modalHeatSize[0],
       distribution: heatSizeDistribution,
+    },
+    lanes: {
+      asnSumSqAvg,
+      asnSumSqBest,
     },
   }
 }

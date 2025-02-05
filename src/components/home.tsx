@@ -1,6 +1,10 @@
-import { SavedAnalysis } from '@/components/analysis/saved-analysis'
+// import { SavedAnalysis } from '@/components/analysis/saved-analysis'
 import { SummaryTable } from '@/components/analysis/summary-table'
-import { useState } from 'react'
+import { LazyReact, LazyReactNaiveRetry } from '@/components/lazy-react'
+// import { LazyReact } from '@/components/lazy-react'
+import { lazy, Suspense, useState } from 'react'
+
+const SavedAnalysisTest = LazyReact(() => import('../components/analysis/saved-analysis'))
 
 export function Home() {
   const [selectedAlgorithm, setSelectedAlgorithm] = useState<string | null>('frankenstein')
@@ -60,7 +64,9 @@ export function Home() {
           </div>
         </section>
 
-        <SavedAnalysis algorithm={selectedAlgorithm} />
+        <Suspense fallback={<div>Loading...</div>}>
+          <SavedAnalysisTest algorithm={selectedAlgorithm} />
+        </Suspense>
       </div>
     </>
   )

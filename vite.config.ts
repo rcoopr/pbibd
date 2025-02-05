@@ -1,4 +1,5 @@
 import path from 'node:path'
+import { fileURLToPath, URL } from 'node:url'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 
@@ -10,6 +11,12 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+      'lucide-react/icons': fileURLToPath(
+        new URL(
+          './node_modules/lucide-react/dist/esm/icons',
+          import.meta.url,
+        ),
+      ),
     },
   },
   optimizeDeps: {

@@ -21,6 +21,7 @@ export interface FlatAnalysis {
   maxMatchups: number
   count: number
   optimal: number
+  asnSumSqAvg: number
 }
 
 const fmt = new Intl.NumberFormat('en-GB', { maximumFractionDigits: 2 })
@@ -59,6 +60,7 @@ export function SummaryTable({ onRowSelect, selectedRow }: SummaryTableProps) {
           maxMatchups: analysis.matchups.max,
           count: analysis.count,
           optimal: analysis.optimal,
+          asnSumSqAvg: analysis.asnSumSqAvg / analysis.asnSumSqBest,
         }
       })
       setData(flatSummaries.sort((a, b) => a.varianceDiff - b.varianceDiff))
@@ -69,7 +71,7 @@ export function SummaryTable({ onRowSelect, selectedRow }: SummaryTableProps) {
   if (!data.length)
     return null
 
-  const cols = ['algorithm', 'athletes', 'heatSize', 'rounds', 'mean', 'variance', 'varianceMin', 'varianceDiff', 'missingMX', 'maxMatchups', 'count', 'optimal'] as const satisfies (keyof FlatAnalysis)[]
+  const cols = ['algorithm', 'athletes', 'heatSize', 'rounds', 'mean', 'variance', 'varianceMin', 'varianceDiff', 'missingMX', 'maxMatchups', 'asnSumSqAvg', 'count', 'optimal'] as const satisfies (keyof FlatAnalysis)[]
 
   return (
     <table className="min-w-full divide-y divide-gray-200">

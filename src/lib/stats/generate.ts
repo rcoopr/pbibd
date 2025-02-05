@@ -2,11 +2,12 @@ import type { AlgoEntry, Algos } from '@/lib/algorithms'
 import type { Division, DrawGenerator } from '../draw/types'
 import type { DrawAnalysis } from './analyze'
 import { algorithms } from '@/lib/algorithms'
+import { createTournamentDraw } from '@/lib/draw/pbibd-lane'
 import { analyzeDivision } from './analyze'
 import { saveArtefact } from './save'
 
-export interface SavedDraw { draw: Division, analysis: { matchups: DrawAnalysis['matchups'] }, parameters: Parameters<DrawGenerator> }
-export interface SavedSummary { matchups: Omit<DrawAnalysis['matchups'], 'matrix' | 'minMXCount' | 'bestMinMXCount'> & { missingMX: number, missingMXPct: number }, count: number, optimal: number }
+export interface SavedDraw { draw: Division, analysis: { matchups: DrawAnalysis['matchups'], lanes: DrawAnalysis['lanes'] }, parameters: Parameters<DrawGenerator> }
+export type SavedSummary = DrawAnalysis['lanes'] & { matchups: Omit<DrawAnalysis['matchups'], 'matrix' | 'minMXCount' | 'bestMinMXCount'> & { missingMX: number, missingMXPct: number }, count: number, optimal: number }
 
 interface AnalysisConfig {
   maxAthletes: number
@@ -21,6 +22,9 @@ const defaultAnalysisConfig: AnalysisConfig = {
 
 // Generate stats for all algos
 (async () => generateSummaryStats())()
+// (() => {
+//   createTournamentDraw(16, 3, 5).generateTournament()
+// })()
 
 async function generateSummaryStats(algorithm?: keyof Algos, config: AnalysisConfig = defaultAnalysisConfig) {
   const selectedAlgos: AlgoEntry[] = algorithm && algorithm in algorithms
@@ -62,7 +66,7 @@ async function genAndSaveAlgoResults([name, impl]: AlgoEntry, config: AnalysisCo
     max: 0,
     missingMX: 0,
     missingMXPct: 0,
-  } }
+  }, asnSumSqAvg: 0, asnSumSqBest: 0 }
   // Create summary statistics averaged across all draws (TODO: check outliers)
 
   const summary = suboptimalRows.reduce((summary, draw) => {
@@ -75,6 +79,9 @@ async function genAndSaveAlgoResults([name, impl]: AlgoEntry, config: AnalysisCo
     summary.matchups.min += draw.analysis.matchups.min
     summary.matchups.max += draw.analysis.matchups.max
     summary.matchups.missingMX += draw.analysis.matchups.minMXCount - draw.analysis.matchups.bestMinMXCount
+
+    summary.asnSumSqAvg += draw.analysis.lanes.asnSumSqAvg
+    summary.asnSumSqBest += draw.analysis.lanes.asnSumSqBest
 
     // diff between 'best' and real, out of max possible matchups
     summary.matchups.missingMXPct += (draw.analysis.matchups.minMXCount - draw.analysis.matchups.bestMinMXCount) / Math.min(draw.analysis.matchups.matrix.length, draw.analysis.matchups.count)
@@ -91,6 +98,9 @@ async function genAndSaveAlgoResults([name, impl]: AlgoEntry, config: AnalysisCo
   summary.matchups.max /= suboptimalRows.length
   summary.matchups.missingMX /= suboptimalRows.length
   summary.optimal = draws.length - suboptimalRows.length
+
+  summary.asnSumSqAvg /= suboptimalRows.length
+  summary.asnSumSqBest /= suboptimalRows.length
 
   await saveArtefact(summary, 'summary', `${config.maxAthletes}-${config.maxHeatSize}-${config.maxRounds}`, name)
 

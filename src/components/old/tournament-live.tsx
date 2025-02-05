@@ -1,4 +1,4 @@
-import { Settings } from 'lucide-react'
+import Settings from 'lucide-react/icons/settings'
 import { useCallback, useState } from 'react'
 import { analyzeLiveheatsDraw } from './analyze'
 import { defaultData, getEventDivisionQuery } from './query'

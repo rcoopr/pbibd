@@ -1,5 +1,7 @@
 import type { DrawResult } from '../../types'
-import { Activity, ArrowDownCircle, BarChart4 } from 'lucide-react'
+import Activity from 'lucide-react/icons/activity'
+import ArrowDownCircle from 'lucide-react/icons/arrow-down-circle'
+import BarChart4 from 'lucide-react/icons/bar-chart-4'
 import { useState } from 'react'
 import Plot from 'react-plotly.js'
 import FacingVisualizer from './FacingVisualizer'

@@ -1,7 +1,7 @@
 import type { UIAnalysisData } from '@/components/analysis/saved-analysis'
 import type { SavedDraw } from '@/lib/stats/generate'
 import { cn } from '@/lib/utils'
-import { SwitchCamera } from 'lucide-react'
+import SwitchCamera from 'lucide-react/icons/switch-camera'
 import { useState } from 'react'
 import Plot from 'react-plotly.js'
 

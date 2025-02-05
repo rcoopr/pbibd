@@ -1,5 +1,5 @@
 import type { DrawResult } from '../../types'
-import { Settings } from 'lucide-react'
+import Settings from 'lucide-react/icons/settings'
 import { useCallback, useState } from 'react'
 import TournamentAnalyzer from './tournament-analyzer'
 import { TournamentDraw } from './TournamentDraw'

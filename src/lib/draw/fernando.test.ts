@@ -1,4 +1,5 @@
 import type { Division } from './types'
+import { gaussianWeightedSelection } from '@/lib/draw/pbibd-lane'
 import { describe, expect, it } from 'vitest'
 import { fernando } from './fernando'
 
@@ -56,5 +57,11 @@ describe('lievheats draw hard-coded', () => {
         [1, 2],
       ],
     ]))
+  })
+})
+
+describe('gauss', () => {
+  it('does the thing', () => {
+    expect(gaussianWeightedSelection(6, [0, 1, 0, 0, 0, 1])).toEqual([0.153360762278211, 0.2528491508588723, 0.153360762278211, 0.03421941144762249, 0.153360762278211, 0.2528491508588723])
   })
 })

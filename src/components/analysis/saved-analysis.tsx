@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react'
 
 export interface UIAnalysisData { algorithm: string, path: string, draws: SavedDraw[] }
 
-export function SavedAnalysis({ algorithm }: { algorithm: string | null }) {
+export default function SavedAnalysis({ algorithm }: { algorithm: string | null }) {
   const [data, setData] = useState<UIAnalysisData[]>([])
 
   useEffect(() => {
@@ -29,7 +29,7 @@ export function SavedAnalysis({ algorithm }: { algorithm: string | null }) {
         {selectedDraw && (
           <>
             <h2 className="font-semibold italic text-gray-600">
-              {'Analysis and Draw Table for algorithm: '}
+              {'Analysis and Draw for algorithm: '}
               <span className="underline">{selectedDraw.algorithm}</span>
             </h2>
             {/* <div className="bg-white rounded-lg shadow-lg overflow-x-auto"> */}

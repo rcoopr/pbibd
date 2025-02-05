@@ -1,32 +1,58 @@
+/* eslint-disable no-console */
 import type { Division, DrawGenerator } from '@/lib/draw/types'
 import { fernando } from '@/lib/draw/fernando'
 
-import { createTournamentDraw } from '@/lib/draw/pbibd'
+import { fernandoBalanced } from '@/lib/draw/fernando-balanced'
+import { createTournamentDraw as pbibdFactory } from '@/lib/draw/pbibd'
+import { createTournamentDraw as pbibdLaneFactory, rotateAthletes } from '@/lib/draw/pbibd-lane'
 import { analyzeDivision } from '@/lib/stats/analyze'
 import { generateDiverseGroups as claude } from './draw/claude'
-import { fernandoBalanced } from '@/lib/draw/fernando-balanced'
 
 const cache = new Map<string, Division>()
 
-const pbibd: DrawGenerator = (n, k, r) => {
-  if (cache.get(`${n}-${k}-${r}`))
-    return cache.get(`${n}-${k}-${r}`)!
+const ITER_COUNT = 2000
+const ASN_TOLERANCE = 0.03
 
-  let best: Division = []
-  let bestVC = Infinity
-  for (let i = 0; i < 500; i++) {
-    // eslint-disable-next-line no-console
-    console.log(`Generating draw ${i + 1} of 50`)
-    const draw = createTournamentDraw(n, k, r).generateTournament().map(r => r.map(h => h.map(a => a.id)))
-    const analysis = analyzeDivision(draw)
-    if (analysis.matchups.varianceChange < bestVC) {
-      bestVC = analysis.matchups.varianceChange
-      best = draw
+let lastTime = performance.now()
+function iter(count: number, pbibdGen: typeof pbibdFactory, name: string): DrawGenerator {
+  return (n, k, r) => {
+    if (cache.get(`${name}-${n}-${k}-${r}`))
+      return cache.get(`${name}-${n}-${k}-${r}`)!
+
+    let best: Division = []
+    let bestVC = Infinity
+    let bestAsn = Infinity
+
+    for (let i = 0; i < count; i++) {
+      const draw = pbibdGen(n, k, r).generateTournament().map(r => r.map(h => h.map(a => a.id)))
+      const analysis = analyzeDivision(draw)
+
+      const asnChange = analysis.lanes.asnSumSqAvg / analysis.lanes.asnSumSqBest
+
+      if (asnChange < (bestAsn + ASN_TOLERANCE)) {
+        if (asnChange < bestAsn) {
+          bestAsn = asnChange
+        }
+
+        if (analysis.matchups.varianceChange < bestVC) {
+          bestVC = analysis.matchups.varianceChange
+          best = draw
+        }
+      }
+
+      // if (analysis.matchups.varianceChange < bestVC) {
+      //   bestVC = analysis.matchups.varianceChange
+      //   best = draw
+      // }
     }
-  }
 
-  cache.set(`${n}-${k}-${r}`, best)
-  return best
+    const time = (performance.now() - lastTime) / count
+    console.log(`Generating draw [${n}, ${k}, ${r}], 1 iter took ${time.toFixed(0)}ms (${((time) / 1000).toFixed(3)}s)`)
+    lastTime = performance.now()
+    cache.set(`${name}-${n}-${k}-${r}`, best)
+    // return name === 'pbibd_lane' ? rotateAthletes(best) : best
+    return best
+  }
 }
 
 // const count = {f: 0, p: 0}
@@ -34,7 +60,7 @@ const pbibd_mix: DrawGenerator = (n, k, r) => {
   const f = fernandoBalanced(n, k, r)
   const fA = analyzeDivision(f)
 
-  const p = pbibd(n, k, r)
+  const p = iter(ITER_COUNT, pbibdFactory, 'pbibd')(n, k, r)
   const pA = analyzeDivision(p)
 
   // fA.matchups.varianceChange < pA.matchups.varianceChange ? count.f++ : count.p++
@@ -46,8 +72,10 @@ export const algorithms = {
   current_balanced: fernandoBalanced,
   claude,
   // claude2,
-  pbibd,
+  pbibd: iter(ITER_COUNT, pbibdFactory, 'pbibd'),
+  pbibd_lane: iter(ITER_COUNT, pbibdLaneFactory, 'pbibd_lane'),
   pbibd_mix,
+  // pbibd_lane,
 } as const satisfies Record<string, DrawGenerator>
 export type Algos = typeof algorithms
 export type AlgoEntry = [keyof Algos, DrawGenerator]
