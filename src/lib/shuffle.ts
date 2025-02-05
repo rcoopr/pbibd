@@ -121,7 +121,10 @@ export function gaussianWeightedSelection(n: number, p: number[], sigma: number 
   return normalizedProbabilities
 }
 
-// WIP
+// WIP - the index next to a `prev` index with a 1 in it is correctly highly likely, but then it starts to fail
+// [0, 1, 0, 0, 0, 1] ends with index 4 (should be highest porb) as lower then 3 or 5.
+// idea: 'blur' or do a rolling avergae over 3/4 indexes to the `prev` array. then do some
+// inversion (1 - p) and scaling to get probabilities.
 export function calculateProbabilities(p: number[], s: number): number[] {
   const n = p.length
   const weights = Array.from({ length: n }).map(() => 0)

@@ -2,7 +2,7 @@ import type { fernando } from '@/lib/draw/fernando'
 import type { Contest } from '@/lib/draw/types'
 import type { DrawAnalysis } from '@/lib/stats/analyze'
 import type { SavedDraw } from '@/lib/stats/generate'
-import { MatchupMatrix } from '@/components/analysis/matchup-matrix'
+import { LaneUtilizationMatrix, MatchupMatrix } from '@/components/analysis/matchup-matrix'
 import { cn } from '@/lib/utils'
 import ChevronLeft from 'lucide-react/icons/chevron-left'
 import ChevronRight from 'lucide-react/icons/chevron-right'
@@ -250,6 +250,13 @@ function Row({ analysis, parameters, draw }: SavedDraw) {
     },
   ]
 
+  const lanes: number[][] = []
+  draw.forEach(r => r.forEach(h => h.forEach((a, i) => {
+    if (!lanes[a - 1])
+      lanes[a - 1] = Array.from({ length: h.length }).fill(0) as number[]
+    lanes[a - 1][i] = (lanes[a - 1][i] || 0) + 1
+  })))
+
   return (
     <>
       <tr onClick={() => setShowDraw(s => !s)} className="cursor-pointer transition-colors duration-150 ease-in-out odd:bg-white odd:hover:bg-gray-50 even:bg-gray-50 even:hover:bg-gray-100">
@@ -287,6 +294,7 @@ function Row({ analysis, parameters, draw }: SavedDraw) {
           <Td colSpan={13}>
             <div className="flex items-start justify-around gap-6 col-span-full py-4 overflow-x-aut">
               <PPDraw draw={draw} />
+              <LaneUtilizationMatrix data={lanes} />
               <MatchupMatrix data={analysis.matchups.matrix} />
             </div>
           </Td>
