@@ -82,6 +82,7 @@ export function cycleArray<T>(arr: T[], by: number): T[] {
   return [...arr.slice(step), ...arr.slice(0, step)]
 }
 
+// Semi WIP
 export function gaussianWeightedSelection(n: number, p: number[], sigma: number = 1.0): number[] {
   /**
    * Generate a Gaussian distribution of probabilities for the next selected index,
@@ -120,6 +121,7 @@ export function gaussianWeightedSelection(n: number, p: number[], sigma: number 
   return normalizedProbabilities
 }
 
+// WIP
 export function calculateProbabilities(p: number[], s: number): number[] {
   const n = p.length
   const weights = Array.from({ length: n }).map(() => 0)
@@ -139,3 +141,36 @@ export function calculateProbabilities(p: number[], s: number): number[] {
   const totalWeight = weights.reduce((a, b) => a + b, 0)
   return weights.map(w => w / totalWeight)
 }
+
+// TODO: chasing pairs - below is a generated draw that was shuffled into good lane assignments by rotateAthletes
+// [
+//   [[6, 7], [3, 1], [2, 5], [4, 8]],
+//   [[7, 3], [2, 6], [1, 8], [5, 4]],
+//   [[6, 5], [1, 8], [4, 3], [7, 2]],
+//   [[5, 1], [3, 6], [8, 2], [4, 7]],
+// ]
+
+// Every lane is used 2 times by each athlete, except for 4 and 8 (3, 1) and (1, 3) uses respectively
+// by searching for a heat with both of them in it (top right cell), we can swap them to make a perfect lane assignment
+// it might be that doing that displaces another athlete, so we follow that to another heat and switch it to compensate
+// if we can find some disjoint cycle then we may be able to fix some outliers
+
+// example 2:
+// [
+//   [[4,1],[3,5],[6,2]],
+//   [[4,3],[1,2],[5,6]],
+// ]
+
+// here we can swap r1h1 and r2h2 - 4 gets a swap and 2 gets a swap, with 1 acting as an intermediate
+// with 2 swaps. maybe we can look for cycles in this way - it gets complicated for higher heat counts
+
+// counterexample
+
+// [
+//   [[4,2,3],[5,1]],
+//   [[2,1],[3,5,4]],
+//   [[2,3,5],[1,4]],
+// ]
+
+// 3, 4, and 5 are using each lane once. 1 and 2 never get a chance to use lane 3, so can never be balanced
+// even though we find them as a pair that could be swapped. it's not so simple.

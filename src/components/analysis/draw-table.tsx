@@ -277,7 +277,9 @@ function Row({ analysis, parameters, draw }: SavedDraw) {
             }}
           />
         </Td>
-        <Td>{fmt.format(analysis.lanes.asnSumSqAvg / analysis.lanes.asnSumSqBest)}</Td>
+        <Td>
+          {fmt.format(analysis.lanes.asnSumSqAvg / analysis.lanes.asnSumSqBest)}
+        </Td>
       </tr>
 
       {showDraw && (
